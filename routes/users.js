@@ -1,6 +1,6 @@
 const express = require('express');
 
-const { getUsers } = require('../services/UserService');
+const { getUsers, addUser } = require('../services/UserService');
 const app = express();
 
 app.get('/users', async (req, res) => {
@@ -9,7 +9,8 @@ app.get('/users', async (req, res) => {
         from = Number(from);
         let limit = req.query.limit || 5;
         limit = Number(limit);
-        const { count, rows } = await getUsers(from, limit);
+        const attributes = ['id', 'firstName', 'email', 'role', 'state'];
+        const { count, rows } = await getUsers(from, limit, null, attributes);
         return res.json({
             users: rows,
             count
@@ -20,7 +21,15 @@ app.get('/users', async (req, res) => {
 });
 
 // app.get('/users/:userId', (req, res) => getUserById(req, res));
-// app.post('/users', (req, res) => addUser(req, res));
+app.post('/users', async (req, res) => {
+    try {
+        let body = req.body;
+        const user = await addUser(body);
+        return res.status(201).json(user);
+    } catch (e) {
+        console.log(e);
+    }
+});
 // app.put('/users/:userId', (req, res) => updateUser(req, res));
 // app.delete('/users/:userId', (req, res) => deleteUser(req, res));
 
