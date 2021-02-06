@@ -13,6 +13,11 @@ const getUsers = async (from = 0, limit = 5, filters, attributes) => {
     return data;
 }
 
+const getUserById = async (id) => {
+    const user = await UserRepository.getUserById(id);
+    return user;
+}
+
 const addUser = async ({firstName, lastName, email, password, img, role, state}) => {
     const user = await UserRepository.addUser({firstName, lastName, email, password, img, role, state});
     return user
@@ -20,5 +25,6 @@ const addUser = async ({firstName, lastName, email, password, img, role, state})
 
 module.exports = {
     getUsers,
+    getUserById,
     addUser
 }

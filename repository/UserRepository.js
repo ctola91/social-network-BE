@@ -5,6 +5,11 @@ const getUsers = async (from = 0, limit = 5, filters, attributes) => {
     return data;
 }
 
+const getUserById = async (id) => {
+    const user = await User.findOne({ where: { id }});
+    return user;
+}
+
 const addUser = async ({firstName, lastName, email, password, img, role, state}) => {
     const user = await User.create({
         firstName,
@@ -20,5 +25,6 @@ const addUser = async ({firstName, lastName, email, password, img, role, state})
 
 module.exports = {
     getUsers,
+    getUserById,
     addUser
 }

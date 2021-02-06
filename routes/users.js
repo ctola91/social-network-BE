@@ -47,7 +47,7 @@
  */
 const express = require('express');
 
-const { getUsers, addUser } = require('../services/UserService');
+const { getUsers, getUserById, addUser } = require('../services/UserService');
 const app = express();
 /**
  * @swagger
@@ -71,7 +71,7 @@ const app = express();
  *                  content: 
  *                      application/json:
  *                          schema:
- *                              type: object
+ *                              type: array
  *                              items: 
  *                                  $ref: '#/components/schemas/User'
  */
@@ -87,12 +87,46 @@ app.get('/users', async (req, res) => {
             users: rows,
             count
         })
-    } catch (error) {
-        console.log(error);
+    } catch (e) {
+        console.log(e);
+        res.status(400).json({ message: e.message });
     }
 });
-
-// app.get('/users/:userId', (req, res) => getUserById(req, res));
+/**
+ * @swagger
+ * 
+ * /users/{userId}:
+ *      get:
+ *          tags:
+ *              - Users
+ *          produces:
+ *              - application/json
+ *          parameters:
+ *              - in: path
+ *                name: userId
+ *                type: number
+ *          responses:
+ *              '200':
+ *                  description: user
+ *                  content: 
+ *                      application/json:
+ *                          schema:
+ *                              type: object 
+ *                              $ref: '#/components/schemas/User'
+ *              '404':
+ *                  description: User not found
+ */
+app.get('/users/:userId', async (req, res) => {
+    try {
+        let userId = req.params.userId;
+        const user = await getUserById(userId);
+        res.json(user);
+    }
+    catch (e) {
+        console.log(e);
+        res.status(400).json({ message: e.message });
+    }
+});
 /**
  * @swagger
  * 
@@ -124,6 +158,7 @@ app.post('/users', async (req, res) => {
         return res.status(201).json(user);
     } catch (e) {
         console.log(e);
+        res.status(400).json({ message: e.message });
     }
 });
 // app.put('/users/:userId', (req, res) => updateUser(req, res));
