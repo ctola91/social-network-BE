@@ -1,6 +1,6 @@
 const express = require("express");
 const _ = require("lodash");
-const { verifyToken, verifyRole } = require("../middlewares/auth");
+const { verifyToken } = require("../middlewares/auth");
 
 const {
   getPosts,
