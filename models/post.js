@@ -20,9 +20,6 @@ module.exports = (sequelize, DataTypes) => {
     tag: { type: DataTypes.STRING, allowNull: true },
     state: { type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true },
     image: { type: DataTypes.STRING, allowNull: true },
-    state: {
-      type: DataTypes.BOOLEAN, allowNull: false, defaultValue: true
-    }
   }, {
     sequelize,
     modelName: 'Post',

@@ -1,73 +1,53 @@
 const express = require("express");
 const _ = require("lodash");
 const { verifyToken, verifyRole } = require("../middlewares/auth");
+
 const {
-  getUsers,
-  getUserById,
-  addUser,
-  updateUser,
-  deleteUser,
-} = require("../services/UserService");
+  getPosts,
+  getPostById,
+  addPost,
+  updatePost,
+  deletePost,
+} = require("../services/PostService");
 /**
  * @swagger
  *  components:
- *      securitySchemes:
- *          bearerAuth:
- *              type: http
- *              scheme: bearer
- *              bearerFormat: JWT
  *      schemas:
- *            User:
+ *            Post:
  *               type: object
  *               required:
- *                   - firstName
- *                   - lastName
- *                   - email
- *                   - password
- *                   - role
+ *                   - description
  *                   - state
  *               properties:
  *                   id:
  *                       type: number
  *                       description: The auto-generated id of the user.
- *                   firstName:
+ *                   description:
  *                       type: string
  *                       description: firstName of user
- *                   lastName:
+ *                   tag:
  *                       type: string
  *                       description: LastName of user
- *                   email:
+ *                   image:
  *                       type: string
  *                       description: Email of user
- *                   password:
- *                       type: string
- *                       description: password of user
- *                   img:
- *                       type: string
- *                       description: image of user
- *                   role:
- *                       type: string,
- *                       description: role of user
  *                   state:
  *                       type: boolean
  *                       description: is available?
  *               example:
- *                   firstName: Christian
- *                   lastName: Tola
- *                   email: admin@gmail.com
- *                   password: your_strong_password
- *                   img: image.jpg
- *                   role: ADMIN_ROLE
+ *                   description: Lorem Ipsum
+ *                   tag: blog
+ *                   image: admin.jpg
  *                   state: true
  */
 const app = express();
 /**
  * @swagger
  *
- * /users:
+ * /posts:
  *      get:
  *          tags:
- *              - Users
+ *              - Posts
  *          produces:
  *              - application/json
  *          parameters:
@@ -77,28 +57,26 @@ const app = express();
  *              - in: query
  *                name: limit
  *                type: number
- *          security:
- *              - bearerAuth: []
  *          responses:
  *              '200':
- *                  description: a list of users
+ *                  description: a list of posts
  *                  content:
  *                      application/json:
  *                          schema:
  *                              type: array
  *                              items:
- *                                  $ref: '#/components/schemas/User'
+ *                                  $ref: '#/components/schemas/Post'
  *              '401':
  *                  description: Token is invalid
  */
-app.get("/users", [verifyToken, verifyRole], async (req, res) => {
+app.get("/posts", async (req, res) => {
   try {
     let from = req.query.from || 0;
     from = Number(from);
     let limit = req.query.limit || 5;
     limit = Number(limit);
-    const attributes = ["id", "firstName", "email", "role", "state"];
-    const { count, rows } = await getUsers(from, limit, null, attributes);
+    const attributes = ["id", "description", "tag", "image", "state"];
+    const { count, rows } = await getPosts(from, limit, null, attributes);
     return res.json({
       users: rows,
       count,
@@ -111,36 +89,34 @@ app.get("/users", [verifyToken, verifyRole], async (req, res) => {
 /**
  * @swagger
  *
- * /users/{userId}:
+ * /posts/{postId}:
  *      get:
  *          tags:
- *              - Users
+ *              - Posts
  *          produces:
  *              - application/json
  *          parameters:
  *              - in: path
- *                name: userId
+ *                name: postId
  *                type: number
- *          security:
- *              - bearerAuth: []
  *          responses:
  *              '200':
- *                  description: user
+ *                  description: Post created
  *                  content:
  *                      application/json:
  *                          schema:
  *                              type: object
- *                              $ref: '#/components/schemas/User'
+ *                              $ref: '#/components/schemas/Post'
  *              '404':
- *                  description: User not found
+ *                  description: Post not found
  *              '401':
  *                  description: Token is invalid
  */
-app.get("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
+app.get("/posts/:postId", async (req, res) => {
   try {
-    let userId = req.params.userId;
-    const user = await getUserById(userId);
-    return res.json(user);
+    let postId = req.params.postId;
+    const post = await getPostById(postId);
+    return res.json(post);
   } catch (e) {
     console.log(e);
     return res.status(400).json({ message: e.message });
@@ -149,10 +125,10 @@ app.get("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
 /**
  * @swagger
  *
- * /users:
+ * /posts:
  *      post:
  *          tags:
- *              - Users
+ *              - Posts
  *          produces:
  *              - application/json
  *          requestBody:
@@ -160,20 +136,20 @@ app.get("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
  *              content:
  *                  application/json:
  *                      schema:
- *                          $ref: '#/components/schemas/User'
+ *                          $ref: '#/components/schemas/Post'
  *          responses:
  *              '201':
- *                  description: user created
+ *                  description: post created
  *                  content:
  *                      application/json:
  *                          schema:
- *                              $ref: '#/components/schemas/User'
+ *                              $ref: '#/components/schemas/Post'
  */
-app.post("/users", async (req, res) => {
+app.post("/posts", async (req, res) => {
   try {
     let body = req.body;
-    const user = await addUser(body);
-    return res.status(201).json(user);
+    const post = await addPost(body);
+    return res.status(201).json(post);
   } catch (e) {
     console.log(e);
     return res.status(400).json({ message: e.message });
@@ -182,15 +158,15 @@ app.post("/users", async (req, res) => {
 /**
  * @swagger
  *
- * /users/{userId}:
+ * /posts/{postId}:
  *      put:
  *          tags:
- *              - Users
+ *              - Posts
  *          produces:
  *              - application/json
  *          parameters:
  *              - in: path
- *                name: userId
+ *                name: postId
  *                type: number
  *          security:
  *              - bearerAuth: []
@@ -199,24 +175,23 @@ app.post("/users", async (req, res) => {
  *              content:
  *                  application/json:
  *                      schema:
- *                          $ref: '#/components/schemas/User'
+ *                          $ref: '#/components/schemas/Post'
  *          responses:
  *              '200':
- *                  description: user created
+ *                  description: post created
  *                  content:
  *                      application/json:
  *                          schema:
- *                              $ref: '#/components/schemas/User'
+ *                              $ref: '#/components/schemas/Post'
  *              '401':
  *                  description: Token is invalid
  */
-app.put("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
+app.put("/posts/:postId", [verifyToken], async (req, res) => {
   try {
-    let userId = req.params.userId;
-    let body = _.pick(req.body, ["name", "email", "role", "state"]);
-
-    const user = await updateUser({ userId, ...body });
-    return res.json(user);
+    let postId = req.params.postId;
+    let body = _.pick(req.body, ["description", "tag", "image", "state"]);
+    const post = await updatePost({ postId, ...body });
+    return res.json(post);
   } catch (e) {
     console.log(e);
     return res.status(400).json({ message: e.message });
@@ -225,35 +200,34 @@ app.put("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
 /**
  * @swagger
  *
- * /users/{userId}:
+ * /posts/{postId}:
  *      delete:
  *          tags:
- *              - Users
+ *              - Posts
  *          produces:
  *              - application/json
  *          parameters:
  *              - in: path
- *                name: userId
+ *                name: postId
  *                type: number
  *          security:
  *              - bearerAuth: []
  *          responses:
  *              '200':
- *                  description: user created
+ *                  description: post created
  *                  content:
  *                      application/json:
  *                          schema:
- *                              $ref: '#/components/schemas/User'
+ *                              $ref: '#/components/schemas/Post'
  *              '401':
  *                  description: Token is invalid
  */
-app.delete("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
+app.delete("/posts/:postId", [verifyToken], async (req, res) => {
   try {
-    let userId = req.params.userId;
-    const userDeleted = await deleteUser(userId);
-    return res.json({ user: userDeleted });
+    let postId = req.params.postId;
+    const postDeleted = await deletePost(postId);
+    return res.json({ pos: postDeleted });
   } catch (e) {
-    console.log(e);
     return res.status(400).json({ message: e.message });
   }
 });
