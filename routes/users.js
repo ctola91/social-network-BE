@@ -1,6 +1,20 @@
+const express = require("express");
+const { verifyToken, verifyRole } = require("../middlewares/auth");
+const {
+  getUsers,
+  getUserById,
+  addUser,
+  updateUser,
+  deleteUser,
+} = require("../services/UserService");
 /**
  * @swagger
  *  components:
+ *      securitySchemes:
+ *          bearerAuth:
+ *              type: http
+ *              scheme: bearer
+ *              bearerFormat: JWT
  *      schemas:
  *            User:
  *               type: object
@@ -30,7 +44,7 @@
  *                   img:
  *                       type: string
  *                       description: image of user
- *                   role: 
+ *                   role:
  *                       type: string,
  *                       description: role of user
  *                   state:
@@ -45,13 +59,10 @@
  *                   role: ADMIN_ROLE
  *                   state: true
  */
-const express = require('express');
-
-const { getUsers, getUserById, addUser } = require('../services/UserService');
 const app = express();
 /**
  * @swagger
- * 
+ *
  * /users:
  *      get:
  *          tags:
@@ -65,36 +76,40 @@ const app = express();
  *              - in: query
  *                name: limit
  *                type: number
+ *          security:
+ *              - bearerAuth: []
  *          responses:
  *              '200':
  *                  description: a list of users
- *                  content: 
+ *                  content:
  *                      application/json:
  *                          schema:
  *                              type: array
- *                              items: 
+ *                              items:
  *                                  $ref: '#/components/schemas/User'
+ *              '401':
+ *                  description: Token is invalid
  */
-app.get('/users', async (req, res) => {
-    try {
-        let from = req.query.from || 0;
-        from = Number(from);
-        let limit = req.query.limit || 5;
-        limit = Number(limit);
-        const attributes = ['id', 'firstName', 'email', 'role', 'state'];
-        const { count, rows } = await getUsers(from, limit, null, attributes);
-        return res.json({
-            users: rows,
-            count
-        })
-    } catch (e) {
-        console.log(e);
-        res.status(400).json({ message: e.message });
-    }
+app.get("/users", [verifyToken, verifyRole], async (req, res) => {
+  try {
+    let from = req.query.from || 0;
+    from = Number(from);
+    let limit = req.query.limit || 5;
+    limit = Number(limit);
+    const attributes = ["id", "firstName", "email", "role", "state"];
+    const { count, rows } = await getUsers(from, limit, null, attributes);
+    return res.json({
+      users: rows,
+      count,
+    });
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({ message: e.message });
+  }
 });
 /**
  * @swagger
- * 
+ *
  * /users/{userId}:
  *      get:
  *          tags:
@@ -105,31 +120,34 @@ app.get('/users', async (req, res) => {
  *              - in: path
  *                name: userId
  *                type: number
+ *          security:
+ *              - bearerAuth: []
  *          responses:
  *              '200':
  *                  description: user
- *                  content: 
+ *                  content:
  *                      application/json:
  *                          schema:
- *                              type: object 
+ *                              type: object
  *                              $ref: '#/components/schemas/User'
  *              '404':
  *                  description: User not found
+ *              '401':
+ *                  description: Token is invalid
  */
-app.get('/users/:userId', async (req, res) => {
-    try {
-        let userId = req.params.userId;
-        const user = await getUserById(userId);
-        res.json(user);
-    }
-    catch (e) {
-        console.log(e);
-        res.status(400).json({ message: e.message });
-    }
+app.get("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
+  try {
+    let userId = req.params.userId;
+    const user = await getUserById(userId);
+    return res.json(user);
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({ message: e.message });
+  }
 });
 /**
  * @swagger
- * 
+ *
  * /users:
  *      post:
  *          tags:
@@ -145,23 +163,99 @@ app.get('/users/:userId', async (req, res) => {
  *          responses:
  *              '201':
  *                  description: user created
- *                  content: 
+ *                  content:
  *                      application/json:
  *                          schema:
- *                              $ref: '#/components/schemas/User' 
+ *                              $ref: '#/components/schemas/User'
  */
-app.post('/users', async (req, res) => {
-    try {
-        let body = req.body;
-        console.log(body);
-        const user = await addUser(body);
-        return res.status(201).json(user);
-    } catch (e) {
-        console.log(e);
-        res.status(400).json({ message: e.message });
-    }
+app.post("/users", async (req, res) => {
+  try {
+    let body = req.body;
+    console.log(body);
+    const user = await addUser(body);
+    return res.status(201).json(user);
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({ message: e.message });
+  }
 });
-// app.put('/users/:userId', (req, res) => updateUser(req, res));
-// app.delete('/users/:userId', (req, res) => deleteUser(req, res));
+/**
+ * @swagger
+ *
+ * /users/{userId}:
+ *      put:
+ *          tags:
+ *              - Users
+ *          produces:
+ *              - application/json
+ *          parameters:
+ *              - in: path
+ *                name: userId
+ *                type: number
+ *          security:
+ *              - bearerAuth: []
+ *          requestBody:
+ *              required: true
+ *              content:
+ *                  application/json:
+ *                      schema:
+ *                          $ref: '#/components/schemas/User'
+ *          responses:
+ *              '200':
+ *                  description: user created
+ *                  content:
+ *                      application/json:
+ *                          schema:
+ *                              $ref: '#/components/schemas/User'
+ *              '401':
+ *                  description: Token is invalid
+ */
+app.put("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
+  try {
+    let userId = req.params.userId;
+    let body = _.pick(req.body, ["name", "email", "role", "state"]);
+
+    const user = await updateUser({ userId, ...body });
+    return res.json(user);
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({ message: e.message });
+  }
+});
+/**
+ * @swagger
+ *
+ * /users/{userId}:
+ *      delete:
+ *          tags:
+ *              - Users
+ *          produces:
+ *              - application/json
+ *          parameters:
+ *              - in: path
+ *                name: userId
+ *                type: number
+ *          security:
+ *              - bearerAuth: []
+ *          responses:
+ *              '200':
+ *                  description: user created
+ *                  content:
+ *                      application/json:
+ *                          schema:
+ *                              $ref: '#/components/schemas/User'
+ *              '401':
+ *                  description: Token is invalid
+ */
+app.delete("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
+  try {
+    let userId = req.params.userId;
+    const userDeleted = await deleteUser(userId);
+    return res.json({ user: userDeleted });
+  } catch (e) {
+    console.log(e);
+    return res.status(400).json({ message: e.message });
+  }
+});
 
 module.exports = app;
