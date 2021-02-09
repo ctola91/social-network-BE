@@ -4,7 +4,7 @@ const TIME_TOKEN = process.env.TIME_TOKEN || 60 * 60 * 24 * 30;
 const SEED = process.env.SEED || "este-es-el-seed-desarrollo";
 const MONGO_USER = process.env.MONGO_USER || "";
 const MONGO_PASSWORD = process.env.MONGO_PASSWORD || "";
-const MONGO_URL = process.env.MONGO_URL || "mongodb://localhost://27017/blogapidev";
+const MONGO_URL = process.env.MONGO_URL || "mongodb://localhost:27017/blogapidev";
 
 const development = {
   username: process.env.DB_USERNAME || "root",
