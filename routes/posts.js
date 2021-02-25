@@ -78,7 +78,7 @@ app.get("/posts", async (req, res) => {
     const attributes = ["id", "description", "tag", "image", "state"];
     const { count, rows } = await getPosts(from, limit, null, attributes);
     return res.json({
-      users: rows,
+      posts: rows,
       count,
     });
   } catch (e) {
