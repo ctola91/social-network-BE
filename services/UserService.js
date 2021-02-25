@@ -1,5 +1,6 @@
 const bcrypt = require("bcrypt");
-const UserRepository = require("../repository/UserRepository");
+// const UserRepository = require("../repository/UserRepository");
+const UserRepository = require("../MongoRepository/UserRepository");
 
 const getUsers = async (from = 0, limit = 5, filters, attributes) => {
   let defaultFilters = {

@@ -97,7 +97,8 @@ app.get("/users", [verifyToken, verifyRole], async (req, res) => {
     from = Number(from);
     let limit = req.query.limit || 5;
     limit = Number(limit);
-    const attributes = ["id", "firstName", "email", "role", "state"];
+    // const attributes = ["id", "firstName", "email", "role", "state"];
+    const attributes = 'id firstName lastName email role';
     const { count, rows } = await getUsers(from, limit, null, attributes);
     return res.json({
       users: rows,

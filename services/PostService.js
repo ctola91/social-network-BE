@@ -1,4 +1,5 @@
-const PostRepository = require("../repository/PostRepository");
+// const PostRepository = require("../repository/PostRepository");
+const PostRepository = require('../MongoRepository/PostRepository');
 
 const getPosts = async (from = 0, limit = 5, filters, attributes) => {
   let defaultFilters = {
