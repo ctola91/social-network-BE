@@ -52,17 +52,15 @@ const updateUser = async ({
   email,
   img,
   role,
-  state,
 }) => {
-  const user = await UserRepository.updateUser(
+  const user = await UserRepository.updateUser({
     userId,
     firstName,
     lastName,
     email,
     role,
-    state,
     img
-  );
+  });
   return user;
 };
 

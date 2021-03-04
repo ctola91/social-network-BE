@@ -36,7 +36,6 @@ const addUser = async ({
     password,
     img,
     role,
-    state,
   });
   return user;
 };
@@ -47,13 +46,20 @@ const updateUser = async ({
   lastName,
   email,
   role,
-  state,
   img,
 }) => {
-  const user = await User.update(
-    { firstName, lastName, email, role, state, img },
-    { where: { id: userId } }
-  );
+  // const user = await User.update(
+  //   { firstName, lastName, email, role, state, img },
+  //   { where: { id: userId } }
+  // );
+  // return user;
+  const currentUser = await User.findOne({ where: { id: userId }});
+  currentUser.firstName = firstName || currentUser.firstName,
+  currentUser.lastName = lastName  || currentUser.lastName,
+  currentUser.email = email || currentUser.email,
+  currentUser.role = role  || currentUser.role,
+  currentUser.img = img || currentUser.img;
+  const user = await currentUser.save();
   return user;
 };
 
@@ -61,7 +67,10 @@ const deleteUser = async (id) => {
   const deleteState = {
     state: false,
   };
-  const user = await User.update(deleteState, { where: { id } });
+  // const user = await User.update(deleteState, { where: { id } });
+  const currentUser = await User.findOne({ where: { id }});
+  currentUser.state = deleteState.state;
+  const user = await currentUser.save();
   return user;
 };
 

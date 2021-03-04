@@ -6,10 +6,6 @@ let CommentSchema = new Schema({
     type: Number,
     required: [true, "post associated is required"],
   },
-  text: {
-    type: String,
-    required: [true, "Text is required"],
-  },
   author: {
     type: Number,
     required: [true, "user is required"],

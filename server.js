@@ -6,7 +6,7 @@ const swaggerUI = require("swagger-ui-express");
 require("dotenv").config();
 
 const { PORT } = require("./config/config");
-const db = require("./connectors/MongoConnector");
+// const db = require("./connectors/MongoConnector");
 const app = express();
 
 const options = {
@@ -48,9 +48,9 @@ app.use(
 // app.use(fileUpload());
 // app.use(morgan("dev"));
 
-db.then(() => console.log("Database connected")).catch(() =>
-  console.log("There is no possible to connect with mongodb")
-);
+// db.then(() => console.log("Database connected")).catch(() =>
+//   console.log("There is no possible to connect with mongodb")
+// );
 
 app.use(require("./routes"));
 

@@ -213,7 +213,7 @@ app.post("/users", async (req, res) => {
 app.put("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
   try {
     let userId = req.params.userId;
-    let body = _.pick(req.body, ["name", "email", "role", "state"]);
+    let body = _.pick(req.body, ["firstName", "lastName", "email", "role"]);
 
     const user = await updateUser({ userId, ...body });
     return res.json(user);
@@ -251,7 +251,7 @@ app.delete("/users/:userId", [verifyToken, verifyRole], async (req, res) => {
   try {
     let userId = req.params.userId;
     const userDeleted = await deleteUser(userId);
-    return res.json({ user: userDeleted });
+    return res.status(204).json({ user: userDeleted });
   } catch (e) {
     console.log(e);
     return res.status(400).json({ message: e.message });
