@@ -46,6 +46,7 @@ or
 
 sudo vim /opt/bitnami/apache2/conf/bitnami/conf/bitnami-apps-prefix.conf
 add to bitnami.conf
+
 ```conf
 Include "/opt/bitnami/projects/myapp/conf/httpd-prefix.conf"
 ```
