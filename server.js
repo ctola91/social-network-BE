@@ -1,11 +1,15 @@
 const express = require("express");
-const bodyParser = require("body-parser");
+const cors = require("cors");
+const { json } = require("body-parser");
 const swaggerJSDoc = require("swagger-jsdoc");
 const swaggerUI = require("swagger-ui-express");
 // const morgan = require("morgan");
 require("dotenv").config();
 
 const { PORT } = require("./config/config");
+const corsOptions = {
+  origin: "http://localhost:3000",
+};
 // const db = require("./connectors/MongoConnector");
 const app = express();
 
@@ -29,16 +33,22 @@ const options = {
     },
     servers: [
       {
-        url: "http://localhost:3000/",
+        url: "http://localhost:3001/",
       },
     ],
   },
-  apis: ["./routes/users.js", "./routes/posts.js", "./routes/comments.js", "./routes/login.js"],
+  apis: [
+    "./routes/users.js",
+    "./routes/posts.js",
+    "./routes/comments.js",
+    "./routes/login.js",
+  ],
 };
 
 const specs = swaggerJSDoc(options);
 
-app.use(bodyParser.json());
+app.use(json());
+app.use(cors(corsOptions));
 app.use(
   "/api-docs",
   swaggerUI.serve,
